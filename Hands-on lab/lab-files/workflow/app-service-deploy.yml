@@ -1,0 +1,64 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy PartsUnlimited
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: partsunlimited-web-suffix # replace suffix
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  DEPLOYMENT_SLOT: staging
+  DOTNET_VERSION: '3.1'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # Checkout the repo
+      - uses: actions/checkout@v2
+
+      # Setup .NET Core SDK
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }} 
+
+      # Run dotnet build and publish
+      - name: dotnet build and publish
+        run: |
+          dotnet build PartsUnlimited.sln --configuration Release
+          dotnet publish PartsUnlimited.sln -c Release -o partsunlimitedweb
+
+      # package published files into GitHub artifact
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v2
+        with:
+          name: partsunlimitedweb-app
+          path: partsunlimitedweb/**
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    
+    steps:
+      # pull GitHub artifact into second stage
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: partsunlimitedweb-app
+
+      # Deploy to Azure Web app slot
+      - name: 'Run Azure webapp deploy action using publish profile credentials'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_XXXXXXXXXXXXXXXXXXXXX }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          slot-name: ${{ env.DEPLOYMENT_SLOT }}

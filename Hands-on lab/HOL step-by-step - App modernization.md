@@ -132,7 +132,7 @@ Azure Migrate provides a centralized hub to assess and migrate on-premises serve
 
     ![Azure Migrate Web App assessment and migration tools are presented.](media/azure-migrate-web-app-migration.png "Azure Migrate Web Apps Capabilities")
 
-8. Another aspect of our migration project will be the database for Parts Unlimited's website. We will have to assess the database's compatibility and migrate to Azure SQL Database. Let's switch to the **SQL Server (only)** section in Azure Migrate. Select **Click here** hyperlink for Assessment tools.
+8. Another aspect of our migration project will be the database for Parts Unlimited's website. We will have to assess the database's compatibility and migrate to Azure SQL Database. Let's switch to the **Databases (only)** section in Azure Migrate. Select **Click here** hyperlink for Assessment tools.
 
     ![Azure Migrate is open. The databases section is selected. Click here link for assessment tools is highlighted.](media/azure-migrate-database-assessment.png "Azure Migrate Databases")
 
@@ -779,7 +779,7 @@ In this exercise, you will move the codebase to a GitHub Repo, create a staging 
 
 11. Open Windows Explorer. Copy the solution template yml file `C:\MCW\MCW-App-modernization-main\Hands-on lab\lab-files\workflow\stagingdeploy.yml` to `C:\MCW\MCW-App-modernization-main\Hands-on lab\lab-files\src\.github\workflows\stagingdeploy.yml`.  You are going to replace the default GitHub workflow yml content.
 
-12. Open the `stagingdeploy.yml` in Visual Studio Code. Replace the suffix value on lines 7 and 11 to match your lab.
+12. Open the `stagingdeploy.yml` in Visual Studio Code. Replace the suffix value on line 7 to match your lab.
 
     ![YML file is displayed with the suffix values highlighted.](media/ymlreplacesuffix.png "YML file")
 

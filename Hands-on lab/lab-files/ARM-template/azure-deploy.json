@@ -50,6 +50,10 @@
         "addressPrefix": "176.16.0.0/16",
         "subnetName": "default",
         "subnetPrefix": "176.16.0.0/24",
+        "bastionPrefix":"176.16.1.0/26",
+        "bastionSubnetName": "AzureBastionSubnet",
+        "bastionName": "[concat('parts-bastion-', uniqueString(resourceGroup().id))]",
+        "bastionPublicIPName": "[concat('parts-bastion-pip-', uniqueString(resourceGroup().id))]",
 
         "webCustomScriptFileName": "configure-webvm.ps1",
         "webCustomScriptUri": "[concat('https://raw.githubusercontent.com/microsoft/MCW-App-modernization/', variables('githubBranchName'),'/Hands-on%20lab/lab-files/ARM-template/', variables('webCustomScriptFileName'))]",
@@ -58,7 +62,8 @@
 
         "dmsName": "[concat('parts-dms-', uniqueString(resourceGroup().id))]",
         "hostingPlanName": "[concat(resourceGroup().name, '-asp-ln-fn')]",
-		"functionAppName": "[concat('parts-func-', uniqueString(resourceGroup().id))]"
+		"functionAppName": "[concat('parts-func-', uniqueString(resourceGroup().id))]",
+        "keyVaultName": "[concat('partsunlimited-kv-', substring(uniqueString(resourceGroup().id),0,6))]"
     },
     "resources": [
         {
@@ -385,6 +390,12 @@
                         "properties": {
                             "addressPrefix": "[variables('subnetPrefix')]"
                         }
+                    }, 
+                    {
+                        "name": "[variables('bastionSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('bastionPrefix')]"
+                        }
                     }
                 ]
             }
@@ -549,6 +560,58 @@
                         }
                     }
                 ]
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2021-06-01-preview",
+            "name": "[variables('keyVaultName')]",
+            "location": "[variables('location')]",
+            "properties": {
+              "sku": {
+                "family": "A",
+                "name": "standard"
+              },
+              "tenantId": "[tenant().tenantId]",
+              "accessPolicies": []
+            }
+        },
+        {
+            "name": "[variables('bastionPublicIPName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-04-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Static"
+            },
+            "sku": {
+                "name": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Network/bastionHosts",
+            "apiVersion": "2021-05-01",
+            "name": "[variables('bastionName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [ "[resourceId('Microsoft.Network/publicIPAddresses', variables('bastionPublicIPName'))]" ],
+            "sku": {
+              "name": "Basic"
+            },
+            "properties": {
+              "ipConfigurations": [
+                {
+                  "name": "ipconfig1",
+                  "properties": {
+                    "privateIPAllocationMethod": "Dynamic",
+                    "publicIPAddress": {
+                      "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('bastionPublicIPName'))]"
+                    },
+                    "subnet": {
+                      "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkName'),variables('bastionSubnetName'))]"
+                    }
+                  }
+                }
+              ]
             }
         }
     ],
